@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from DB.DB_Chroma import *
 
-db = DB_chroma()
+# db = DB_chroma()
 
 def find_images():
     col1, col2, col3 = st.columns(3)
