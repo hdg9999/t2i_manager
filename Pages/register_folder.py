@@ -14,10 +14,11 @@ if folder_select_button:
   selected_folder_path = select_folder()
   st.session_state.folder_path = selected_folder_path
 
-
 st.divider()
 st.write('선택된 폴더')
-st.info(st.session_state.folder_path)
+if selected_folder_path:
+  st.info(selected_folder_path)
+  st.button('폴더 등록')
 
 
 
