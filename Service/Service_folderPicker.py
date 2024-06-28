@@ -5,7 +5,7 @@ import traceback
 import streamlit as st
 
 from tkinter import filedialog
-from DB.DB_Chroma import DB_chroma
+from DB.DB_Chroma import DB_CLIENT
 
 def select_folder():
    root = tkinter.Tk()
@@ -15,20 +15,15 @@ def select_folder():
    return folder_path
 
 def upload():
-   client = DB_chroma()
-
    ids = [file.path for file in os.scandir(st.session_state.folder_path)]
    image_files = [file.path for file in os.scandir(st.session_state.folder_path)]
-   metadatas = [{'file_name':file.name} for file in os.scandir(st.session_state.folder_path)]
-
-   # pprint.pp(metadatas)
+   metadatas = [{'file_name':file.name, 'tags':[]} for file in os.scandir(st.session_state.folder_path)]
    
    try:      
-      client.add('img',ids=ids, image_files=image_files, file_info=metadatas)
+      DB_CLIENT.add('img',ids=ids, image_files=image_files, file_info=metadatas)
    except ValueError as VE:
-      if 'Collection img already exists' in VE.args:
-         client.create('img')
-         client.add('img',ids=ids, image_files=image_files, file_info=metadatas)
+      if 'Collection img does not exist.' in VE.args:
+         DB_CLIENT.create('img')
+         DB_CLIENT.add('img',ids=ids, image_files=image_files, file_info=metadatas)
       else:
-         print(traceback.format_exc())
-         raise Exception('뭔가 잘못되었습니다! 에러 로그를 확인하세요.')
+         raise VE
