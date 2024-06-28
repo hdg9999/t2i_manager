@@ -1,8 +1,8 @@
 import os
 
 import streamlit as st
-from Pages.sidebar_menu import sidebar_menu
-from Service.Service_folderPicker import select_folder
+from Navigation.sidebar_menu import sidebar_menu
+from Service.Service_folderPicker import select_folder, upload
 
 sidebar_menu()
 
@@ -18,7 +18,7 @@ st.divider()
 st.write('선택된 폴더')
 if selected_folder_path:
   st.info(selected_folder_path)
-  st.button('폴더 등록')
+  st.button('폴더 등록', on_click=upload)
 
 
 
