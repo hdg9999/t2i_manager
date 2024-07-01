@@ -1,4 +1,5 @@
 import chromadb
+from chromadb import Documents, EmbeddingFunction, Embeddings
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction, EmbeddingFunction
 from chromadb.utils.data_loaders import ImageLoader
 
@@ -15,6 +16,7 @@ class DB_chroma():
         
     def create(self, collection_name:str):
         self.client.create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)
+        # self.client.create_collection(collection_name, data_loader=self.image_loader)
 
     def search(self, collection_name:str, query_texts:list[str]):
         collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
