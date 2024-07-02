@@ -1,8 +1,48 @@
 import chromadb
+import pprint
+import numpy as np
+from overrides import override
+import torch
+from typing import Optional, Union
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction, EmbeddingFunction
+from chromadb.api.types import Images, Image, is_document, is_image, URI
 from chromadb.utils.data_loaders import ImageLoader
 
+from transformers import AutoProcessor, AutoModel, VisionTextDualEncoderProcessor, VisionTextDualEncoderModel
+
+
+class ImageLoaderForKoCLIP(ImageLoader):
+    #RGB 혹은 JPG 타입 이미지로 변환하지 않으면 ValueError: Unable to infer channel dimension format 발생하기 때문에 convert("RGB")만 추가한 코드로 오버라이드해서 사용
+    @override
+    def _load_image(self, uri: Optional[URI]) -> Optional[Image]:        
+        return np.array(self._PILImage.open(uri).convert("RGB")) if uri is not None else None
+
+
+class KoCLIPEmbeddingFunction(EmbeddingFunction):
+    #한국어 지원하는 KoCLIP 모델 사용을 위한 Custom EmbeddingFunction 작성
+    def __call__(self, input: Union[Documents, Images]) -> Embeddings:
+        embeddings: Embeddings = []
+        processor:VisionTextDualEncoderProcessor = AutoProcessor.from_pretrained("koclip/koclip-base-pt")
+        model:VisionTextDualEncoderModel = AutoModel.from_pretrained("koclip/koclip-base-pt")
+
+        for item in input:            
+
+            if is_image(item):
+                pre_processed = processor(images=item, return_tensors="pt", padding=True)
+                with torch.no_grad():
+                    #squeeze() 해야 validate_embeddings 부분에서 오류 안남
+                    embedding = model.get_image_features(**pre_processed).squeeze().tolist()
+                    embeddings.append(embedding)
+            elif is_document(item):
+                pre_processed = processor(text=item, return_tensors="pt", padding=True)
+                with torch.no_grad():
+                    #squeeze() 해야 validate_embeddings 부분에서 오류 안남
+                    embedding = model.get_text_features(**pre_processed).squeeze().tolist()
+                    embeddings.append(embedding)                
+
+        pprint.pp(embeddings)
+        return embeddings
 
 class DB_chroma():
     client: chromadb.ClientAPI
@@ -11,8 +51,10 @@ class DB_chroma():
 
     def __init__(self):
         self.client = chromadb.PersistentClient()
-        self.embedding_function = OpenCLIPEmbeddingFunction()
-        self.image_loader = ImageLoader()
+        # self.embedding_function = OpenCLIPEmbeddingFunction()
+        self.embedding_function = KoCLIPEmbeddingFunction()
+        # self.image_loader = ImageLoader()
+        self.image_loader = ImageLoaderForKoCLIP()
         
     def create(self, collection_name:str):
         self.client.create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)

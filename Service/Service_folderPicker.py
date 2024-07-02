@@ -27,3 +27,5 @@ def upload():
          DB_CLIENT.add('img',ids=ids, image_files=image_files, file_info=metadatas)
       else:
          raise VE
+   
+   st.info('등록이 완료되었습니다.')
