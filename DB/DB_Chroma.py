@@ -23,25 +23,34 @@ class KoCLIPEmbeddingFunction(EmbeddingFunction):
     #한국어 지원하는 KoCLIP 모델 사용을 위한 Custom EmbeddingFunction 작성
     def __call__(self, input: Union[Documents, Images]) -> Embeddings:
         embeddings: Embeddings = []
-        processor:VisionTextDualEncoderProcessor = AutoProcessor.from_pretrained("koclip/koclip-base-pt")
-        model:VisionTextDualEncoderModel = AutoModel.from_pretrained("koclip/koclip-base-pt")
+        local_koclip_path = '.koclip'
+        hf_koclip_repo_name = 'koclip/koclip-base-pt'
+        try:
+            processor= AutoProcessor.from_pretrained(local_koclip_path)
+            model= AutoModel.from_pretrained(local_koclip_path)
+        except:
+            print('\t## koclip 모델이 없습니다. huggingface에서 다운로드받습니다.')
+            processor:VisionTextDualEncoderProcessor = AutoProcessor.from_pretrained(hf_koclip_repo_name)
+            model:VisionTextDualEncoderModel = AutoModel.from_pretrained(hf_koclip_repo_name)
+            processor.save_pretrained(local_koclip_path)
+            model.save_pretrained(local_koclip_path)
+        finally:
+            print('\t# koclip 로드 성공')
 
-        for item in input:            
-
-            if is_image(item):
-                pre_processed = processor(images=item, return_tensors="pt", padding=True)
-                with torch.no_grad():
+        with torch.no_grad():
+            for item in input:        
+                if is_image(item):
+                    pre_processed = processor(images=item, return_tensors="pt", padding=True)
                     #squeeze() 해야 validate_embeddings 부분에서 오류 안남
                     embedding = model.get_image_features(**pre_processed).squeeze().tolist()
                     embeddings.append(embedding)
-            elif is_document(item):
-                pre_processed = processor(text=item, return_tensors="pt", padding=True)
-                with torch.no_grad():
+                elif is_document(item):
+                    pre_processed = processor(text=item, return_tensors="pt", padding=True)
                     #squeeze() 해야 validate_embeddings 부분에서 오류 안남
                     embedding = model.get_text_features(**pre_processed).squeeze().tolist()
                     embeddings.append(embedding)                
 
-        pprint.pp(embeddings)
+        # pprint.pp(embeddings)
         return embeddings
 
 class DB_chroma():
@@ -59,6 +68,10 @@ class DB_chroma():
     def create(self, collection_name:str):
         self.client.create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)
         # self.client.create_collection(collection_name, data_loader=self.image_loader)
+
+    def get(self, collection_name:str, ids:str):
+        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
+        return collection.get(ids)
 
     def search(self, collection_name:str, query_texts:list[str]):
         collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
