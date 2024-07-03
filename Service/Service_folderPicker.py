@@ -17,7 +17,7 @@ def select_folder():
 def upload():
    ids = [file.path for file in os.scandir(st.session_state.folder_path)]
    image_files = [file.path for file in os.scandir(st.session_state.folder_path)]
-   metadatas = [{'file_name':file.name, 'tags':''} for file in os.scandir(st.session_state.folder_path)]
+   metadatas = [{'file_name':file.name} for file in os.scandir(st.session_state.folder_path)]
    
    try:      
       DB_CLIENT.add('img',ids=ids, image_files=image_files, file_info=metadatas)
@@ -29,3 +29,10 @@ def upload():
          raise VE
    
    st.info('등록이 완료되었습니다.')
+
+def update_tags(id, tags:list[str]):
+   new_metadata = {}
+   for tag in tags:
+      new_metadata[tag]='tag'
+
+   DB_CLIENT.update('img', id, file_path=None, metadata=new_metadata)

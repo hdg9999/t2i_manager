@@ -9,12 +9,16 @@ def main():
     # print('initialize...')
     st.session_state.images = []    
     st.session_state.query_text = ''
+
+    
     # print('initialize complete')
     
     sidebar_menu()
     st.title("갖고있는 로컬 파일 이미지 검색")
 
     st.text_input("검색어", on_change=find_images, key='query_text')
+    selected = st.multiselect('선택', options=['test1','test2','test3'])
+    print(selected)
 
     if "search_result" in st.session_state:
         search_result = st.session_state.search_result
@@ -36,6 +40,8 @@ def main():
                     st.image(file_path)
                     if st.button(metadata['file_name']):
                         show_detail(file_path=file_path, metadata=metadata) 
+    
+
 
 
 if __name__ == "__main__":

@@ -65,10 +65,15 @@ class DB_chroma():
         # self.image_loader = ImageLoader()
         self.image_loader = ImageLoaderForKoCLIP()
         
+    #Collection level 함수
     def create(self, collection_name:str):
         self.client.create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)
         # self.client.create_collection(collection_name, data_loader=self.image_loader)
 
+    def drop(self, collection_name:str):
+        self.client.delete_collection(collection_name)
+
+    #Document level 함수
     def get(self, collection_name:str, ids:str):
         collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
         return collection.get(ids)
@@ -81,11 +86,7 @@ class DB_chroma():
         self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).add(ids=ids, uris=image_files, metadatas=file_info)
 
     def update(self, collection_name:str, id:str, file_path:str, metadata:dict):
-        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).update(ids=id, uris=file_path, metadatas=metadata)
-
-    def drop(self, collection_name:str):
-        self.client.delete_collection(collection_name)
-    
+        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).update(ids=id, uris=file_path, metadatas=metadata)       
 
 
 DB_CLIENT = DB_chroma()
