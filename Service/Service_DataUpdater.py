@@ -6,7 +6,7 @@ import streamlit as st
 from DB.DB_Chroma import DB_CLIENT
 
 def update_tags(id, tags:list[str]):
-   new_metadata = {}
+   new_metadata = {'file_name':os.path.basename(id)}
    for tag in tags:
       new_metadata[tag]='tag'
 

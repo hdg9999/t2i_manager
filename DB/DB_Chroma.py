@@ -19,7 +19,7 @@ class ImageLoaderForKoCLIP(ImageLoader):
         return np.array(self._PILImage.open(uri).convert("RGB")) if uri is not None else None
 
 
-class KoCLIPEmbeddingFunction(EmbeddingFunction):
+class KoCLIPEmbeddingFunction(EmbeddingFunction[Union[Documents, Images]]):
     #한국어 지원하는 KoCLIP 모델 사용을 위한 Custom EmbeddingFunction 작성
     def __call__(self, input: Union[Documents, Images]) -> Embeddings:
         embeddings: Embeddings = []
@@ -36,6 +36,8 @@ class KoCLIPEmbeddingFunction(EmbeddingFunction):
             model.save_pretrained(local_koclip_path)
         finally:
             print('\t# koclip 로드 성공')
+
+        print('\t\t##input:',input)
 
         with torch.no_grad():
             for item in input:        
@@ -86,7 +88,11 @@ class DB_chroma():
         self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).add(ids=ids, uris=image_files, metadatas=file_info)
 
     def update(self, collection_name:str, id:str, file_path:str, metadata:dict):
-        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).update(ids=id, uris=file_path, metadatas=metadata)       
+        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).update(ids=id, uris=file_path, metadatas=metadata)
+
+    def upsert(self, collection_name:str, ids:str|list[str], image_files:str|list[str], file_info:dict|list[dict]):
+        print('DB_upsert:', collection_name, ' / ',ids,' / ',image_files,' / ',file_info)
+        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).upsert(ids=ids, uris=image_files, metadatas=file_info)      
 
 
 DB_CLIENT = DB_chroma()

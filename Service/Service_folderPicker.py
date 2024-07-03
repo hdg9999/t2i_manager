@@ -30,9 +30,3 @@ def upload():
    
    st.info('등록이 완료되었습니다.')
 
-def update_tags(id, tags:list[str]):
-   new_metadata = {}
-   for tag in tags:
-      new_metadata[tag]='tag'
-
-   DB_CLIENT.update('img', id, file_path=None, metadata=new_metadata)
