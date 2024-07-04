@@ -67,32 +67,41 @@ class DB_chroma():
         # self.image_loader = ImageLoader()
         self.image_loader = ImageLoaderForKoCLIP()
         
-    #Collection level 함수
+    #client 함수
     def create(self, collection_name:str):
         self.client.create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)
-        # self.client.create_collection(collection_name, data_loader=self.image_loader)
 
+    def get_or_create(self, collection_name:str):
+        self.client.get_or_create_collection(collection_name, metadata={"hnsw:space": "cosine"}, data_loader=self.image_loader)
+        
     def drop(self, collection_name:str):
         self.client.delete_collection(collection_name)
+    
+    def get_img_collection(self, collection_name):
+        return self.client.get_collection(name=collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader)
 
-    #Document level 함수
+    #collection 함수
     def get(self, collection_name:str, ids:str):
-        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
+        collection = self.get_img_collection(collection_name)
         return collection.get(ids)
 
     def search(self, collection_name:str, query_texts:list[str]):
-        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
+        collection = self.get_img_collection(collection_name)
         return collection.query(query_texts=query_texts)
     
     def add(self, collection_name:str, ids:str|list[str], image_files:str|list[str], file_info:dict|list[dict]):
-        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).add(ids=ids, uris=image_files, metadatas=file_info)
+        self.get_img_collection(collection_name).add(ids=ids, uris=image_files, metadatas=file_info)
 
     def update(self, collection_name:str, id:str, file_path:str, metadata:dict):
-        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).update(ids=id, uris=file_path, metadatas=metadata)
+        self.get_img_collection(collection_name).update(ids=id, uris=file_path, metadatas=metadata)
 
     def upsert(self, collection_name:str, ids:str|list[str], image_files:str|list[str], file_info:dict|list[dict]):
         print('DB_upsert:', collection_name, ' / ',ids,' / ',image_files,' / ',file_info)
-        self.client.get_collection(collection_name, embedding_function=self.embedding_function, data_loader=self.image_loader).upsert(ids=ids, uris=image_files, metadatas=file_info)      
+        self.get_img_collection(collection_name).upsert(ids=ids, uris=image_files, metadatas=file_info)
+
+    def delete(self, collection_name:str, ids:str):
+        self.get_img_collection(collection_name).delete(ids=ids)    
+    
 
 
 DB_CLIENT = DB_chroma()

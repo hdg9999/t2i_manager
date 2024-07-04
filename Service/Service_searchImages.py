@@ -2,6 +2,7 @@ import os
 import pprint
 
 import streamlit as st
+from streamlit.runtime.media_file_storage import MediaFileStorageError
 from DB.DB_Chroma import DB_CLIENT
 from PIL import Image
 
@@ -20,6 +21,15 @@ def find_images():
             st.error("DB 생성이 되어있지 않습니다. 폴더 등록 페이지에서 폴더를 지정하여 업로드해보세요!")
         else:
             raise VE
+
+def show_img_or_delete(img_path, metadata):
+    try:
+        st.image(img_path)
+        if st.button(metadata['file_name']):
+            show_detail(file_path=img_path, metadata=metadata) 
+    except MediaFileStorageError as ME:
+        DB_CLIENT.delete('img', img_path)
+        st.error(f'삭제된 파일입니다. {img_path}')
 
 #이미지 클릭 시 나타나는 팝업창
 @st.experimental_dialog("이미지 상세", width='large')
