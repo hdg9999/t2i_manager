@@ -13,7 +13,7 @@ def open_image(file_path):
 # 이미지 검색 결과 데이터 session_state에 저장
 def find_images():
     try:    
-        search_result = DB_CLIENT.search('img', st.session_state.query_text)
+        search_result = DB_CLIENT.search('img', query_texts=st.session_state.query_text, where=st.session_state.selected_tags)
         st.session_state.search_result = search_result
         pprint.pp(search_result)
     except ValueError as VE:
