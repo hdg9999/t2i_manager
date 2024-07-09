@@ -4,20 +4,22 @@ import os
 from Service.Service_searchImages import *
 from Navigation.sidebar_menu import sidebar_menu
 
+def init():
+    if 'init' not in st.session_state:
+        print('initialize...')
+        st.session_state.images = []    
+        st.session_state.query_text = ''
+        st.session_state.tag_list = ['test1','test2','test3']
+        st.session_state.init = True    
+        print('initialize complete')    
 
 def main():
-    # print('initialize...')
-    st.session_state.images = []    
-    st.session_state.query_text = ''
-
-    
-    # print('initialize complete')
-    
+    init()    
     sidebar_menu()
     st.title("갖고있는 로컬 파일 이미지 검색")
 
     st.text_input("검색어", on_change=find_images, key='query_text')
-    selected = st.multiselect('선택', options=['test1','test2','test3'])
+    selected = st.multiselect('선택', options=st.session_state.tag_list)
     print(selected)
 
     if "search_result" in st.session_state:
