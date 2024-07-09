@@ -8,7 +8,9 @@ def sidebar_menu():
     with st.sidebar:
         st.page_link(page='app.py', label='Home')
         st.page_link(page='Pages/register_folder.py', label='폴더 등록')
+        st.page_link(page='Pages/clear_db.py', label='초기화(데이터 전체 삭제)')
         tag_manager()
+        search_options()
 
 def tag_manager():
     st.divider()
@@ -31,3 +33,7 @@ def tag_manager():
 
     tags = st.multiselect('등록된 태그', options=st.session_state.tag_list, placeholder='태그 선택...', default=st.session_state.tag_list, format_func=selected_tags_formatter)
     delete_tags = st.button(label='선택된 태그 삭제')
+
+def search_options():
+    st.divider()
+    st.session_state.top_K = st.slider(label='검색 갯수', min_value=1, max_value=1000)

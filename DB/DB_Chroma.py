@@ -86,22 +86,17 @@ class DB_chroma():
         collection = self.get_img_collection(collection_name)
         return collection.get(ids)
 
-    def search(self, collection_name:str, query_texts:list[str], where:list[dict]|None):
+    def search(self, collection_name:str, query_texts:list[str], where:list[dict]|None, top_k:10):
         collection = self.get_img_collection(collection_name)
         where_expression = None
         if where:
+            #검색할 태그가 한개밖에 없는 경우 '$and' operator 사용하면 안됨.
             if len(where) !=1:
                 where_expression = {'$and':where}
             else:
                 where_expression = where[0]
         print(where_expression)
-        return collection.query(query_texts=query_texts, where=where_expression)
-        # if where:
-        #     where_expression = {'$and':where}
-        #     return collection.query(query_texts=query_texts, where=where_expression)
-        # else:
-        #     return collection.query(query_texts=query_texts)
-
+        return collection.query(query_texts=query_texts, where=where_expression, n_results=top_k)
     
     def add(self, collection_name:str, ids:str|list[str], image_files:str|list[str], file_info:dict|list[dict]):
         self.get_img_collection(collection_name).add(ids=ids, uris=image_files, metadatas=file_info)

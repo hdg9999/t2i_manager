@@ -13,6 +13,7 @@ def init():
         st.session_state.images = []    
         st.session_state.query_text = ''
         st.session_state.selected_tags = []
+        st.session_state.top_K = 10
         try:        
             with open('tags.p', 'rb') as tag_config_file:
                 st.session_state.tag_list = pickle.load(tag_config_file)
@@ -29,7 +30,7 @@ def main():
     st.title("갖고있는 로컬 파일 이미지 검색")
 
     st.text_input("검색어", on_change=find_images, key='query_text')
-    st.session_state.selected_tags = st.multiselect('선택', options=st.session_state.tag_list, format_func=selected_tags_formatter)
+    st.session_state.selected_tags = st.multiselect('검색할 태그', options=st.session_state.tag_list, format_func=selected_tags_formatter)
 
     if "search_result" in st.session_state:
         search_result = st.session_state.search_result
@@ -39,18 +40,12 @@ def main():
             if idx%3==0:            
                 with col1:
                     show_img_or_delete(file_path, metadata)
-                    # if st.button(metadata['file_name']):
-                    #     show_detail(file_path=file_path, metadata=metadata) 
             elif idx%3==1:            
                 with col2:
                     show_img_or_delete(file_path, metadata)
-                    # if st.button(metadata['file_name']):
-                    #     show_detail(file_path=file_path, metadata=metadata) 
             elif idx%3==2:
                 with col3:
-                    show_img_or_delete(file_path, metadata)
-                    # if st.button(metadata['file_name']):
-                    #     show_detail(file_path=file_path, metadata=metadata)     
+                    show_img_or_delete(file_path, metadata)  
 
 if __name__ == "__main__":
     main()
