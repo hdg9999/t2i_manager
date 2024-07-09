@@ -61,6 +61,7 @@ class DB_chroma():
     image_loader: ImageLoader
 
     def __init__(self):
+        ## KoCLIP대신 OpenCLIP 사용하려면 KoCLIP 관련 클래스 대신 주석처리된 부분 해제하여 사용. 이 경우 프로그램이 약간 더 가벼워지는것 같지만 한글 검색이 안됨.
         self.client = chromadb.PersistentClient()
         # self.embedding_function = OpenCLIPEmbeddingFunction()
         self.embedding_function = KoCLIPEmbeddingFunction()
