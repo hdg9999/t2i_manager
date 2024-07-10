@@ -35,7 +35,7 @@ def show_img_or_delete(img_path, metadata):
 
 # metadata를 multiselect출력용으로 변환
 def metadata_to_tags(metadata:dict):
-    return [ {key:{'$eq':True}} for key in iter(metadata) if key!='file_name' ]
+    return [ {key:{'$eq':True}} for key in iter(metadata) if key!='file_name' and metadata[key]==True ]
 
 #이미지 클릭 시 나타나는 팝업창
 @st.experimental_dialog("이미지 상세", width='large')
@@ -46,11 +46,16 @@ def show_detail(file_path, metadata):
         tags_to_update = st.multiselect(label='태그', options=st.session_state.tag_list, format_func=selected_tags_formatter, default=metadata_to_tags(metadata))
         print('tags_to_update:',tags_to_update)      
         if st.form_submit_button('변경사항 저장'):
+            ## 업데이트된 태그 정보 저장 로직
             print('update...')
             metadata_to_update = {}
-            for key in [next(iter(tag)) for tag in tags_to_update]:
-                print('key:',key)
-                metadata_to_update[key] = True
+            pure_tags_to_update = [next(iter(tag)) for tag in tags_to_update]
+            for key_to_add in pure_tags_to_update:
+                # print('new key:',key_to_add)
+                metadata_to_update[key_to_add] = True
+            for key_to_set_false in [ tag for tag in iter(metadata) if tag not in pure_tags_to_update and tag !='file_name']:
+                # print('old key to be set \'False\':', key_to_set_false)
+                metadata_to_update[key_to_set_false] = False
             print('metadata to update:',metadata_to_update)
             DB_CLIENT.update('img', id=file_path, file_path=file_path, metadata=metadata_to_update)
             st.toast('변경사항이 저장되었습니다.',icon='✅')

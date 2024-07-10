@@ -13,7 +13,7 @@ from transformers import AutoProcessor, AutoModel, VisionTextDualEncoderProcesso
 
 
 class ImageLoaderForKoCLIP(ImageLoader):
-    #RGB 혹은 JPG 타입 이미지로 변환하지 않으면 ValueError: Unable to infer channel dimension format 발생하기 때문에 convert("RGB")만 추가한 코드로 오버라이드해서 사용
+    #RGB 혹은 JPG 형식 이미지로 변환하지 않으면 ValueError: Unable to infer channel dimension format 발생하기 때문에 convert("RGB")만 추가한 코드로 오버라이드해서 사용
     @override
     def _load_image(self, uri: Optional[URI]) -> Optional[Image]:        
         return np.array(self._PILImage.open(uri).convert("RGB")) if uri is not None else None
