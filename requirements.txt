@@ -1,4 +1,4 @@
-streamlit==1.12.1
+streamlit==1.36.0
 chromadb==0.5.3
 torch==2.3.1
 open-clip-torch==2.24.0
