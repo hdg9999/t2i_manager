@@ -15,8 +15,8 @@ def sidebar_menu():
 def page_menu():    
     st.subheader('메뉴', divider=True)    
     st.page_link(page='app.py', label='Home')
-    st.page_link(page='Pages/register_folder.py', label='폴더 등록')
-    # st.page_link(page='Pages/clear_db.py', label='초기화(데이터 전체 삭제)')  //백신이 막아서.. 일단 보류
+    st.page_link(page='pages/register_folder.py', label='폴더 등록')
+    # st.page_link(page='pages/clear_db.py', label='초기화(데이터 전체 삭제)')  //백신이 막아서.. 일단 보류
     st.write('\n') #여백
 
 def tag_manager():

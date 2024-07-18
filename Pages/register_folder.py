@@ -5,7 +5,6 @@ from Navigation.sidebar_menu import sidebar_menu
 from Service.Service_folderPicker import select_folder, upload
 
 sidebar_menu()
-
 st.title('폴더 등록')
 
 selected_folder_path = st.session_state.get("folder_path", None)
